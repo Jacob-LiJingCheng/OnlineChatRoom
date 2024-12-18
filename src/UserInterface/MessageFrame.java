@@ -7,6 +7,7 @@ import java.awt.event.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Vector;
 
 class MessageFrame extends JFrame {
@@ -273,7 +274,7 @@ class MessageFrame extends JFrame {
 
         if (!messageLog.isEmpty()) {
             for (ChatMessage msg : messageLog) {
-                appendMessage(msg.getSenderName(), msg.getMessageInString(), msg.getSendTime(), msg.getSenderName() == currentUser);
+                appendMessage(msg.getSenderName(), msg.getMessageInString(), msg.getSendTime(), Objects.equals(msg.getSenderName(), currentUser));
             }
         }
     }

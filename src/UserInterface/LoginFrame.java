@@ -13,14 +13,12 @@ import java.util.Vector;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-// 登录界面
 class LoginFrame extends JFrame {
     private JTextField usernameField;
     private JPasswordField passwordField;
     Client client;
 
     public LoginFrame(Client passClient) {
-        // 设置窗口基本属性
         client = passClient;
 
         setTitle("Login System");
@@ -29,22 +27,19 @@ class LoginFrame extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // 使用 BorderLayout 作为主要布局
         setLayout(new BorderLayout());
 
-        // 创建顶部标题面板
         JPanel titlePanel = createTitlePanel();
         add(titlePanel, BorderLayout.NORTH);
 
-        // 创建中间内容面板
         JPanel contentPanel = createContentPanel();
         add(contentPanel, BorderLayout.CENTER);
 
-        // 创建底部按钮面板
         JPanel buttonPanel = createButtonPanel();
         add(buttonPanel, BorderLayout.SOUTH);
         setVisible(true);
     }
+
     private JPanel createTitlePanel() {
         JPanel panel = new JPanel();
         panel.setBackground(new Color(51, 122, 183));
@@ -64,17 +59,14 @@ class LoginFrame extends JFrame {
         panel.setBorder(new EmptyBorder(20, 40, 20, 40));
         GridBagConstraints gbc = new GridBagConstraints();
 
-        // 用户名输入框
         JLabel userLabel = new JLabel("Username:");
         usernameField = new JTextField(15);
         styleTextField(usernameField);
 
-        // 密码输入框
         JLabel passLabel = new JLabel("password:");
         passwordField = new JPasswordField(15);
         styleTextField(passwordField);
 
-        // 设置组件位置
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.anchor = GridBagConstraints.WEST;
 
@@ -97,7 +89,6 @@ class LoginFrame extends JFrame {
         JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
         panel.setBorder(new EmptyBorder(0, 0, 20, 0));
 
-        // 登录按钮及其逻辑
         JButton loginButton = new JButton("Login");
         styleButton(loginButton);
         loginButton.addActionListener(e -> {
@@ -105,38 +96,38 @@ class LoginFrame extends JFrame {
             String password = new String(passwordField.getPassword());
             if (username.isEmpty()){
                 UIManager.put("OptionPane.okButtonText", "Yes");
-                JOptionPane.showMessageDialog(this, "Username cannot be empty！", "Error",
+                JOptionPane.showMessageDialog(this, "Username cannot be empty!", "Error",
                         JOptionPane.INFORMATION_MESSAGE);
                 UIManager.put("OptionPane.okButtonText", null);
             }
             else if (loginToServer(username, password)) {
                 UIManager.put("OptionPane.okButtonText", "Yes");
-                JOptionPane.showMessageDialog(this, "Success in login！", "Tips",
+                JOptionPane.showMessageDialog(this, "Success in login!", "Tips",
                         JOptionPane.INFORMATION_MESSAGE);
                 UIManager.put("OptionPane.okButtonText", null);
 
-                String filePath ="dat/" + username + "/contactAccount.dat"; // 路径包含新文件夹
+                String filePath ="dat/" + username + "/contactAccount.dat";
 
-                File file = new File(filePath); File parentDir = file.getParentFile(); // 获取父目录
+                File file = new File(filePath); File parentDir = file.getParentFile();
 
                 if (!parentDir.exists()) {
-                    boolean dirsCreated = parentDir.mkdirs(); // 创建所有缺失的父目录
+                    boolean dirsCreated = parentDir.mkdirs();
                     if (dirsCreated) {
-                        System.out.println("文件夹已创建：" + parentDir.getAbsolutePath());
+                        System.out.println("Folder created: " + parentDir.getAbsolutePath());
                     } else {
-                        System.err.println("文件夹创建失败！");
-                        return; // 如果无法创建文件夹，直接退出
+                        System.err.println("Folder creation failed!");
+                        return;
                     }
                 }
 
                 try {
                     if (file.createNewFile()) {
-                        System.out.println("文件已创建：" + file.getAbsolutePath());
+                        System.out.println("File created: " + file.getAbsolutePath());
                     } else {
-                        System.out.println("文件已存在：" + file.getAbsolutePath());
+                        System.out.println("File already exists: " + file.getAbsolutePath());
                     }
                 } catch (IOException e1) {
-                    System.err.println("文件创建失败：" + e1.getMessage());
+                    System.err.println("File creation failed: " + e1.getMessage());
                 }
 
                 try (FileInputStream fis = new FileInputStream(filePath);
@@ -145,10 +136,9 @@ class LoginFrame extends JFrame {
                     ChatApp.contactArrayList = oldData;
                 } catch (Exception e1) {
                     System.out.println(e1.getMessage());
-                    System.out.println("file not found");;
+                    System.out.println("File not found");
                 }
 
-                //加载所有离线时接收到的消息 还未优化成监听线程返回Message, 因此和下面的不能交换次序
                 Map<String, ArrayList<ChatMessage>> contentNewMessageMap = askForContactNewMessageToServer(username);
                 for (Map.Entry<String,ArrayList<ChatMessage>> entry : contentNewMessageMap.entrySet()) {
                     for (int i = 0; i < ChatApp.contactArrayList.size(); i++){
@@ -161,11 +151,9 @@ class LoginFrame extends JFrame {
                     }
                 }
 
-                //开始监听服务端的消息
                 ExecutorService executor = Executors.newSingleThreadExecutor();
                 executor.submit(()->client.keepReadMessageFromServer());
 
-                //更新所有过去已有联系的用户的状态
                 Map<String,Object> contentStatueMap = askForContactStatueToServer();
                 for (Map.Entry<String,Object> entry : contentStatueMap.entrySet()) {
                     for (int i = 0; i < ChatApp.contactArrayList.size(); i++) {
@@ -175,33 +163,22 @@ class LoginFrame extends JFrame {
                         }
                     }
                 }
-                //绘制用户显示
                 new ContactFrame(username, client);
                 dispose();
             } else {
                 UIManager.put("OptionPane.okButtonText", "Yes");
-                JOptionPane.showMessageDialog(this, "Fail to login: wrong username or password！",
+                JOptionPane.showMessageDialog(this, "Fail to login: wrong username or password!",
                         "Error", JOptionPane.ERROR_MESSAGE);
                 UIManager.put("OptionPane.okButtonText", null);
             }
         });
 
-        // 注册按钮
         JButton registerButton = new JButton("Register");
         styleButton(registerButton);
         registerButton.addActionListener(e -> {
             RegisterDialog registerDialog = new RegisterDialog(this, client);
             registerDialog.setVisible(true);
         });
-
-        //此段模拟已实现，可删除该段代码
-        /* registerButton.addActionListener(e -> {
-            //  添加注册功能
-            UIManager.put("OptionPane.okButtonText", "Yes");
-            JOptionPane.showMessageDialog(this, "Register is waiting for opening!", "Tips",
-                    JOptionPane.INFORMATION_MESSAGE);
-            UIManager.put("OptionPane.okButtonText", null);
-        });*/
 
         panel.add(loginButton);
         panel.add(registerButton);
@@ -216,7 +193,6 @@ class LoginFrame extends JFrame {
         button.setForeground(Color.WHITE);
         button.setBorder(BorderFactory.createRaisedBevelBorder());
 
-        // 添加鼠标悬停效果
         button.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 button.setBackground(new Color(40, 96, 144));
@@ -235,33 +211,23 @@ class LoginFrame extends JFrame {
         ));
     }
 
-    //TODO 此处需要适配Message类，此处已完成
     private boolean loginToServer(String username, String password) {
-        // 登录验证逻辑
         return client.login(username, password);
     }
 
-
-    //TODO 此处需要适配
     private Map<String,Object> askForContactStatueToServer(){
         ArrayList<String> listAfter = new ArrayList<>();
-
         for (int i = 0; i < ChatApp.contactArrayList.size(); i++){
             listAfter.add(ChatApp.contactArrayList.get(i).name);
         }
         if(listAfter.isEmpty()){
             return new HashMap<>();
         }
-
         return client.requestUsersStatus(listAfter);
-
     }
 
-    //TODO 此处需要适配
     private Map<String,ArrayList<ChatMessage>> askForContactNewMessageToServer(String username){
-        // 这里添加实际的获取用户信息键值对的逻辑
         Map<String,ArrayList<String>> mapBefore = client.requestOfflineMessages();
-
         Map<String,ArrayList<ChatMessage>> mapAfter = new HashMap<>();
         String time,message;
         if(mapBefore == null){
@@ -272,19 +238,18 @@ class LoginFrame extends JFrame {
             for (int i = 0; i < entry.getValue().size();i++){
                 String[] parts =entry.getValue().get(i).split("@@");
                 if (parts.length == 2) {
-                     time = parts[0];
-                     message = parts[1];
-                     ChatMessage chatMessage = new ChatMessage(time, entry.getKey(), message);
-                     arrayListAfter.add(chatMessage);
+                    time = parts[0];
+                    message = parts[1];
+                    ChatMessage chatMessage = new ChatMessage(time, entry.getKey(), message);
+                    arrayListAfter.add(chatMessage);
                 }else{time = "";
-                      message = "";
+                    message = "";
                 }
             }
             mapAfter.put(entry.getKey(),arrayListAfter);
         }
         return mapAfter;
     }
-
 }
 
 // 注册功能对话框类

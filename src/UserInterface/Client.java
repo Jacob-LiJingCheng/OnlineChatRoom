@@ -51,7 +51,7 @@ public class Client {
 
         // 验证密码: 6-12字符，仅允许字母和数字
         if (!Pattern.matches("^[a-zA-Z0-9]{6,12}$", password)) {
-            System.out.println("密码格式不正确！必须是6-12位字母或数字。");
+            System.out.println("Password format is incorrect! Must be 6-12 letters or numbers.");
             return false;
         }
 
@@ -88,10 +88,10 @@ public class Client {
                 if (response.getContent().equals("correct")) {
                     isLoggedIn = true;
                     currentUser = username;
-                    System.out.println("登录成功！");
+                    System.out.println("login successfully!");
                     return true;
                 } else {
-                    System.out.println("登录失败: " + response.getContent());
+                    System.out.println("login failure: " + response.getContent());
                     return false;
                 }
             }
@@ -105,7 +105,7 @@ public class Client {
     public Message register(String username, String password) {
         // 验证输入格式
         if (!isValidInput(username, password)) {
-            System.out.println("输入格式错误：用户名和密码必须是6-12位的字母数字组合");
+            System.out.println("Incorrect format: The username and password must be a 6-12 digit alphanumeric combination.");
             return null;
         }
 
@@ -131,9 +131,9 @@ public class Client {
             // 检查响应类型和内容
             if (response.getOperation() == Message.Operation.REGISTER) {
                 if (response.getContent().equals("correct")) {
-                    System.out.println("注册成功！");
+                    System.out.println("registered successfully! ");
                 } else {
-                    System.out.println("注册失败：" + response.getContent());
+                    System.out.println("fail to register: " + response.getContent());
                 }
                 return response;  // 返回服务器的响应消息
             }
@@ -528,7 +528,7 @@ public class Client {
             while (isRunning){
                 if(isAlreadyRead()){
                     Message mes= (Message) inputStream.readObject();
-//                    System.out.println("接收到"+mes.getContent());
+//                    System.out.println("received"+mes.getContent());
                     if(mes!=null){
                         currentMessage = mes;
                         setAlreadyRead(false);

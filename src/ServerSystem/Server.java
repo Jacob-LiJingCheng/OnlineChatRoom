@@ -264,9 +264,14 @@ public class Server {
                     e.printStackTrace();
                     sendErrorMessage(senderSocket, "error@@delivery", sender);
                 }
-            } else if(receiverSocket != null ){
-                // 如果接收者离线，将消息存储为离线消息
-                storeOfflineMessage(receiver, message);
+            } else {
+                for(User user:users){
+                    if (user.getUsername().equals(receiver)){
+                        // 如果接收者离线且存在，将消息存储为离线消息
+                        storeOfflineMessage(receiver, message);
+                        break;
+                    }
+                }
             }
         }
 
@@ -421,7 +426,7 @@ public class Server {
             Message successMessage = new Message(sender, null, Message.Operation.SEND_MESSAGE, "Success");
             outputStream.writeObject(successMessage);
             outputStream.flush();
-            System.out.println("成功响应发送者：" + sender);
+            System.out.println(" Successful response sender: "+ sender);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -456,8 +461,9 @@ public class Server {
 
         // 移除映射关系
         if (disconnectedUser != null) {
+            findUserByUsername(disconnectedUser).setStatus(User.Status.OFFLINE);
             userSocketMap.remove(disconnectedUser);
-            System.out.println("用户 " + disconnectedUser + " 已断开连接并移除映射。");
+            System.out.println("user " + disconnectedUser + " disconnected.");
         }
 
         // 从客户端流列表中移除Socket
@@ -503,7 +509,7 @@ public class Server {
             while (true) {
                 String command = scanner.nextLine();
                 if ("exit".equalsIgnoreCase(command)) {
-                    System.out.println("收到退出命令，正在关闭服务端...");
+                    System.out.println("Exit command received, shutting down server...");
                     server.closeServer();
                     System.exit(0); // 退出程序
                 }

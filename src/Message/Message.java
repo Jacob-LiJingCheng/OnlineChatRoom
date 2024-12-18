@@ -1,10 +1,7 @@
 package Message;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 // 消息类，包含了消息的各种属性以及操作类型枚举
 public class Message implements Serializable,Cloneable {
@@ -127,7 +124,14 @@ public class Message implements Serializable,Cloneable {
     }
 
     public void setMesMap(Map<String, ArrayList<String>> mesMap) {
-        this.mesMap = mesMap;
+        Map<String, ArrayList<String>> copiedMap = new HashMap<>();
+        for (Map.Entry<String, ArrayList<String>> entry : mesMap.entrySet()) {
+            // 深拷贝每个ArrayList
+            ArrayList<String> copiedList = new ArrayList<>(entry.getValue());
+            copiedMap.put(entry.getKey(), copiedList);
+        }
+
+        this.mesMap = copiedMap;
     }
 
     public Map<String, Object> getAttributes() {
